@@ -13,4 +13,6 @@ model Speciality {
 
   @@index([isDeleted], name: "idx_speciality_isDeleted")
   @@index([title], name: "idx_speciality_title")
+
+  @@map("speciality")
 }

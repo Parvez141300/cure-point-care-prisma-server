@@ -9,7 +9,7 @@ interface IRegisterPatientPayload {
 }
 
 const registerPatientInDB = async (payload: IRegisterPatientPayload) => {
-    const {name, email, password} = payload;
+    const { name, email, password } = payload;
     const data = await auth.api.signUpEmail({
         body: {
             name,
@@ -18,16 +18,24 @@ const registerPatientInDB = async (payload: IRegisterPatientPayload) => {
         }
     });
 
-    if(!data.user){
+    if (!data.user) {
         throw new Error("User not found");
     }
 
     // todo: create patient after signup
-    // const patient = await prisma.$transaction(async (tx) => {
-    //     await 
-    // })
+    const patient = await prisma.$transaction(async (tx) => {
+        const patientTx = await tx.patient.create({
+            data: {
+                userId: data.user.id,
+                name: payload.name,
+                email: payload.email,
+            }
+        });
 
-    return data;
+        return patientTx;
+    });
+
+    return { ...data, patient };
 }
 
 interface ILoginUserPayload {
@@ -36,7 +44,7 @@ interface ILoginUserPayload {
 }
 
 const loginUserInDB = async (payload: ILoginUserPayload) => {
-    const {email, password} = payload;
+    const { email, password } = payload;
     const data = await auth.api.signInEmail({
         body: {
             email,
@@ -44,11 +52,11 @@ const loginUserInDB = async (payload: ILoginUserPayload) => {
         }
     });
 
-    if(data.user.status === UserStatus.BLOCKED) {
+    if (data.user.status === UserStatus.BLOCKED) {
         throw new Error("User is blocked");
     }
 
-    if(data.user.status === UserStatus.DELETED){
+    if (data.user.status === UserStatus.DELETED) {
         throw new Error("User is deleted");
     }
 
