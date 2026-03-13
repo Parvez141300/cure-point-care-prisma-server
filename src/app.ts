@@ -18,9 +18,9 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Cure Point Care server is running')
 });
 
-// global error handeling
-app.use(globalErrorHandler);
 // not found route
 app.use(notFround);
+// global error handeling
+app.use(globalErrorHandler);
 
 export default app;
