@@ -16,4 +16,7 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Cure Point Care server is running')
 });
 
+// global error handeling
+// app.use()
+
 export default app;
