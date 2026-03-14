@@ -55,8 +55,10 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  Doctor: 'Doctor',
   Patient: 'Patient',
-  Speciality: 'Speciality'
+  Speciality: 'Speciality',
+  DoctorSpeciality: 'DoctorSpeciality'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -138,6 +140,31 @@ export const VerificationScalarFieldEnum = {
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
 
 
+export const DoctorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  profilePhoto: 'profilePhoto',
+  contactNumber: 'contactNumber',
+  registrationNumber: 'registrationNumber',
+  experience: 'experience',
+  appointmentFee: 'appointmentFee',
+  qualification: 'qualification',
+  currentWorkingPlace: 'currentWorkingPlace',
+  designation: 'designation',
+  averageRating: 'averageRating',
+  address: 'address',
+  gender: 'gender',
+  isDeleted: 'isDeleted',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type DoctorScalarFieldEnum = (typeof DoctorScalarFieldEnum)[keyof typeof DoctorScalarFieldEnum]
+
+
 export const PatientScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -168,6 +195,15 @@ export const SpecialityScalarFieldEnum = {
 } as const
 
 export type SpecialityScalarFieldEnum = (typeof SpecialityScalarFieldEnum)[keyof typeof SpecialityScalarFieldEnum]
+
+
+export const DoctorSpecialityScalarFieldEnum = {
+  id: 'id',
+  doctorId: 'doctorId',
+  specialityId: 'specialityId'
+} as const
+
+export type DoctorSpecialityScalarFieldEnum = (typeof DoctorSpecialityScalarFieldEnum)[keyof typeof DoctorSpecialityScalarFieldEnum]
 
 
 export const SortOrder = {

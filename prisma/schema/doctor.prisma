@@ -16,7 +16,7 @@ model Doctor {
     gender              Gender
     isDeleted           Boolean @default(false)
 
-    deletedAt DateTime
+    deletedAt DateTime?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
