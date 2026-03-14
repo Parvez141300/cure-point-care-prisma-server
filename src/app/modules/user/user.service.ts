@@ -36,7 +36,6 @@ const createDoctorInDB = async (payload: ICreateDoctorPayload) => {
             password: payload.password,
             role: Role.DOCTOR,
             needPasswordChange: true,
-
         }
     });
 
@@ -60,39 +59,17 @@ const createDoctorInDB = async (payload: ICreateDoctorPayload) => {
                 data: doctorSpecialityData
             });
 
-            const doctor = await prisma.doctor.findUnique({
+            const doctor = await tx.doctor.findUnique({
                 where: {
                     id: doctorData.id
                 },
-                select: {
-                    id: true,
-                    userId: true,
-                    name: true,
-                    email: true,
-                    profilePhoto: true,
-                    contactNumber: true,
-                    registrationNumber: true,
-                    experience: true,
-                    appointmentFee: true,
-                    qualification: true,
-                    currentWorkingPlace: true,
-                    designation: true,
-                    address: true,
-                    gender: true,
-                    createdAt: true,
-                    updatedAt: true,
+                include: {
                     user: {
                         select: {
-                            id: true,
-                            email: true,
                             name: true,
-                            role: true,
+                            email: true,
                             status: true,
-                            emailVerified: true,
-                            image: true,
-                            isDeleted: true,
-                            createdAt: true,
-                            updatedAt: true,
+                            id: true,
                         }
                     },
                     specialities: {
@@ -100,11 +77,11 @@ const createDoctorInDB = async (payload: ICreateDoctorPayload) => {
                             speciality: {
                                 select: {
                                     id: true,
-                                    title: true
+                                    title: true,
                                 }
                             }
                         }
-                    }
+                    },
                 }
             });
 
