@@ -7,6 +7,6 @@ const router = Router();
 
 router.use("/auth", AuthRoute);
 router.use("/specialities", SpecialityRoute);
-router.use("/doctors", UserRoute);
+router.use("/users", UserRoute);
 
 export const IndexRoute = router;
