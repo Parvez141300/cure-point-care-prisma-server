@@ -8,12 +8,26 @@ model Speciality {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
+  isDeleted          Boolean            @default(false)
+  deletedAt          DateTime?
+  doctorSpecialities DoctorSpeciality[]
 
   @@index([isDeleted], name: "idx_speciality_isDeleted")
   @@index([title], name: "idx_speciality_title")
-
   @@map("speciality")
 }
 
+model DoctorSpeciality {
+  id           String @id @default(uuid(7))
+  doctorId     String
+  specialityId String
+
+  // relation
+  doctor     Doctor     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  speciality Speciality @relation(fields: [specialityId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, specialityId])
+  @@index([doctorId], name: "idx_doctor_speciality_doctorId")
+  @@index([specialityId], name: "idx_doctor_speciality_specialityId")
+  @@map("doctor_speciality")
+}
