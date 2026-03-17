@@ -2,7 +2,10 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { Role, UserStatus } from "../../generated/prisma/enums";
+import ms, { StringValue } from "ms";
+import { envVars } from "../../config/env";
 
+const convertMilisecondToSecond = (milisecond: number) => milisecond / 1000;
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -40,4 +43,12 @@ export const auth = betterAuth({
             },
         },
     },
+    session: {
+        expiresIn: convertMilisecondToSecond(ms(envVars.BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN as StringValue)),
+        updateAge: convertMilisecondToSecond(ms(envVars.BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE as StringValue)),
+        cookieCache: {
+            enabled: true,
+            maxAge: convertMilisecondToSecond(ms(envVars.BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN as StringValue)),
+        }
+    }
 });

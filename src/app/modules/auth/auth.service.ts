@@ -37,7 +37,25 @@ const registerPatientInDB = async (payload: IRegisterPatientPayload) => {
             return patientTx;
         });
 
-        return { ...data, patient };
+        const accessToken = tokenUtils.getAccessToken({
+            userId: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            status: data.user.status,
+            isDeleted: data.user.isDeleted,
+        });
+
+        const refreshToken = tokenUtils.getRefreshToken({
+            userId: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            status: data.user.status,
+            isDeleted: data.user.isDeleted,
+        });
+
+        return { ...data, patient, accessToken, refreshToken };
     } catch (error) {
         console.log('patient profile create transaction error: ', error);
         await prisma.user.delete({

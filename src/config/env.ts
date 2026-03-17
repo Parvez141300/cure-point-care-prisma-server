@@ -12,6 +12,8 @@ interface EnvConfig {
     JWT_REFRESH_TOKEN_SECRET: string;
     JWT_ACCESS_TOKEN_EXPIRES_IN: string;
     JWT_REFRESH_TOKEN_EXPIRES_IN: string;
+    BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN: string;
+    BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -25,6 +27,8 @@ const loadEnvVariables = (): EnvConfig => {
         "JWT_REFRESH_TOKEN_SECRET",
         "JWT_ACCESS_TOKEN_EXPIRES_IN",
         "JWT_REFRESH_TOKEN_EXPIRES_IN",
+        "BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN",
+        "BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE",
     ];
 
     requireEnvVariable.forEach((variable) => {
@@ -43,6 +47,8 @@ const loadEnvVariables = (): EnvConfig => {
         JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_TOKEN_SECRET as string,
         JWT_ACCESS_TOKEN_EXPIRES_IN: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN as string,
         JWT_REFRESH_TOKEN_EXPIRES_IN: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN as string,
+        BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN: process.env.BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN as string,
+        BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: process.env.BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE as string,
     }
 }
 
