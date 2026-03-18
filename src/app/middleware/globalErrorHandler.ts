@@ -6,6 +6,7 @@ import status from "http-status";
 import z from "zod";
 import { IErrorResponse, IErrorSources } from "../interfaces/error.interface";
 import AppError from "../errorHelpers/AppError";
+import { handleZodError } from "../errorHelpers/HandleZodError";
 
 
 
@@ -39,15 +40,11 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
     ] */
 
     if (err instanceof z.ZodError) {
-        statusCode = status.BAD_REQUEST;
-        message = "Zod validation error";
+        const simpifiedZodError= handleZodError(err);
+        statusCode = simpifiedZodError.statusCode as number;
+        message = simpifiedZodError.message;
 
-        err.issues.forEach((issue) => {
-            errorSources.push({
-                path: issue.path.join(" => "),
-                message: issue.message,
-            })
-        });
+        errorSources = [...simpifiedZodError.errorSources];
     }
     else if (err instanceof AppError) {
         statusCode = err.statusCode;

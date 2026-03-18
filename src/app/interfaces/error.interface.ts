@@ -5,8 +5,9 @@ export interface IErrorSources {
 
 export interface IErrorResponse {
     success: boolean;
+    statusCode?: number;
     message: string;
-    errorSources?: IErrorSources[];
+    errorSources: IErrorSources[];
     stack?: string;
     data?: unknown;
 }
