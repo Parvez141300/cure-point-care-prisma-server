@@ -16,12 +16,12 @@ const getAllAdminFromDB = async () => {
 };
 
 const getAdminByIdFromDB = async (id: string) => {
-    const admin = await prisma.user.findUnique({
+    const admin = await prisma.admin.findUnique({
         where: {
             id: id,
         },
         include: {
-            admin: true,
+            user: true,
         }
     });
     
