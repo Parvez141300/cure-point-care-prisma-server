@@ -13,6 +13,18 @@ const getAllAdmin = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getAdminById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await AdminService.getAdminByIdFromDB(id as string);
+    sendResponse(res, {
+        httpStatusCode: 200,
+        success: true,
+        message: "Admin fetched successfully",
+        data: result,
+    });
+});
+
 export const AdminController = {
     getAllAdmin,
+    getAdminById,
 }
