@@ -1,7 +1,9 @@
+import status from "http-status";
 import { Role, Speciality } from "../../../generated/prisma/client";
+import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { ICreateDoctorPayload } from "./user.interface";
+import { ICreateAdminPayload, ICreateDoctorPayload } from "./user.interface";
 
 const createDoctorInDB = async (payload: ICreateDoctorPayload) => {
     const specialities: Speciality[] = [];
@@ -96,6 +98,58 @@ const createDoctorInDB = async (payload: ICreateDoctorPayload) => {
     }
 };
 
+const createAdminInDB = async (payload: ICreateAdminPayload) => {
+    const {password, admin} = payload;
+    const userExists = await prisma.user.findUnique({
+        where: {
+            email: admin.email
+        }
+    });
+
+    if (userExists) {
+        throw new AppError(status.BAD_REQUEST, `User with email ${payload.admin.email} already exists`);
+    }
+
+    const userData = await auth.api.signUpEmail({
+        body: {
+            name: admin.name,
+            email: admin.email,
+            password,
+            role: Role.ADMIN,
+            needPasswordChange: true,
+        }
+    });
+
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            const adminData = await tx.admin.create({
+                data: {
+                    userId: userData.user.id,
+                    ...admin,
+                }
+            });
+
+            const adminInfo = await tx.admin.findUnique({
+                where: {
+                    id: adminData.id,
+                },
+                include: {
+                    user: true,
+                }
+            });
+
+            return adminInfo;
+        });
+
+        return result;
+    } catch (error) {
+        console.log('create admin error: ', error);
+        await prisma.user.delete({ where: { id: userData.user.id } });
+        throw error;
+    }
+}
+
 export const UserService = {
     createDoctorInDB,
+    createAdminInDB,
 }

@@ -20,7 +20,7 @@ router.post("/create-doctor",
     // }
     validateRequest(createDoctorZodSchema),
     UserController.createDoctor);
-// router.post("/create-admin", UserController.createDoctor);
+router.post("/create-admin", UserController.createAdmin);
 // router.post("/create-super-admin", UserController.createDoctor);
 
 export const UserRoute = router;
