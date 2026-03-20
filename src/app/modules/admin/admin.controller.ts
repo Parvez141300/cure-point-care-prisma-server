@@ -24,6 +24,18 @@ const getAdminById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const updateAdmin = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const payload = req.body;
+    const result = await AdminService.updateAdminInDB(id as string, payload);
+    sendResponse(res, {
+        httpStatusCode: 200,
+        success: true,
+        message: "Admin updated successfully",
+        data: result,
+    });
+});
+
 const softDeleteAdmin = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await AdminService.softDeleteAdminInDB(id as string);
@@ -39,4 +51,5 @@ export const AdminController = {
     getAllAdmin,
     getAdminById,
     softDeleteAdmin,
+    updateAdmin,
 }
