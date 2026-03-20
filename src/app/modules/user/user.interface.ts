@@ -33,3 +33,15 @@ export interface ICreateAdminPayload {
         gender: Gender;        
     };
 }
+export interface ICreateSuperAdminPayload {
+    password: string;
+    superAdmin: {
+        name: string;
+        email: string;
+        profilePhoto: string;
+        contactNumber: string;
+        address: string;
+        experience: number;
+        gender: Gender;        
+    };
+}

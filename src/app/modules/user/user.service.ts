@@ -3,7 +3,7 @@ import { Role, Speciality } from "../../../generated/prisma/client";
 import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { ICreateAdminPayload, ICreateDoctorPayload } from "./user.interface";
+import { ICreateAdminPayload, ICreateDoctorPayload, ICreateSuperAdminPayload } from "./user.interface";
 
 const createDoctorInDB = async (payload: ICreateDoctorPayload) => {
     const specialities: Speciality[] = [];
@@ -148,8 +148,59 @@ const createAdminInDB = async (payload: ICreateAdminPayload) => {
         throw error;
     }
 }
+const createSuperAdminInDB = async (payload: ICreateSuperAdminPayload) => {
+    const {password, superAdmin} = payload;
+    const userExists = await prisma.user.findUnique({
+        where: {
+            email: superAdmin.email
+        }
+    });
+
+    if (userExists) {
+        throw new AppError(status.BAD_REQUEST, `User with email ${payload.superAdmin.email} already exists`);
+    }
+
+    const userData = await auth.api.signUpEmail({
+        body: {
+            name: superAdmin.name,
+            email: superAdmin.email,
+            password,
+            role: Role.ADMIN,
+            needPasswordChange: true,
+        }
+    });
+
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            const adminData = await tx.admin.create({
+                data: {
+                    userId: userData.user.id,
+                    ...superAdmin,
+                }
+            });
+
+            const adminInfo = await tx.admin.findUnique({
+                where: {
+                    id: adminData.id,
+                },
+                include: {
+                    user: true,
+                }
+            });
+
+            return adminInfo;
+        });
+
+        return result;
+    } catch (error) {
+        console.log('create admin error: ', error);
+        await prisma.user.delete({ where: { id: userData.user.id } });
+        throw error;
+    }
+}
 
 export const UserService = {
     createDoctorInDB,
     createAdminInDB,
+    createSuperAdminInDB,
 }

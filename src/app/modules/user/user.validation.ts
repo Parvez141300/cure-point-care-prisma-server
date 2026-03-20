@@ -31,3 +31,29 @@ export const createDoctorZodSchema = z.object({
     }),
     specialities: z.array(z.uuid("Speciality ID is Required")).min(1, "At least one Speciality is Required"),
 });
+
+export const createAdminZodSchema = z.object({
+    password: z.string("Password is Required").min(8, "Password must be at least 8 characters long").max(20, "Password must be at most 20 characters long"),
+    admin: z.object({
+        name: z.string("Name is Requried").min(5, "Name must be at least 5 characters long").max(100, "Name must be at most 100 characters long"),
+        email: z.email("Invalid email"),
+        profilePhoto: z.string("Profile Photo is Required").min(5, "Profile Photo must be at least 5 characters long").max(100, "Profile Photo must be at most 100 characters long"),
+        contactNumber: z.string("Contact Number is Required").min(11, "Contact Number must be at least 11 characters long").max(14, "Contact Number must be at most 14 characters long"),
+        address: z.string("Address is Required").min(5, "Address must be at least 5 characters long").max(100, "Address must be at most 100 characters long"),
+        experience: z.int("Experience is Required").nonnegative("Expericence cannot be negative"),
+        gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER], "Gender is Required"),
+    }),
+});
+
+export const createSuperAdminZodSchema = z.object({
+    password: z.string("Password is Required").min(8, "Password must be at least 8 characters long").max(20, "Password must be at most 20 characters long"),
+    superAdmin: z.object({
+        name: z.string("Name is Requried").min(5, "Name must be at least 5 characters long").max(100, "Name must be at most 100 characters long"),
+        email: z.email("Invalid email"),
+        profilePhoto: z.string("Profile Photo is Required").min(5, "Profile Photo must be at least 5 characters long").max(100, "Profile Photo must be at most 100 characters long"),
+        contactNumber: z.string("Contact Number is Required").min(11, "Contact Number must be at least 11 characters long").max(14, "Contact Number must be at most 14 characters long"),
+        address: z.string("Address is Required").min(5, "Address must be at least 5 characters long").max(100, "Address must be at most 100 characters long"),
+        experience: z.int("Experience is Required").nonnegative("Expericence cannot be negative"),
+        gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER], "Gender is Required"),
+    }),
+});
