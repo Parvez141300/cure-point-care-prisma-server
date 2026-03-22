@@ -1,0 +1,16 @@
+model Payment {
+    id            String @id @default(uuid(7))
+    appointmentId String @unique @db.Uuid
+
+    amount             Float
+    transactionId      String
+    status             PaymentStatus @default(UNPAID)
+    paymentGatewayData Json
+    createdAt          DateTime      @default(now())
+    updatedAt          DateTime      @updatedAt
+
+    // relations
+    appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+    @@map("payments")
+}
