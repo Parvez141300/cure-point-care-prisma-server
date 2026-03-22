@@ -1,6 +1,6 @@
 model PatientHealthData {
-  id                  String        @id @default(dbgenerated("gen_random_uuid()")) 
-  patientId           String        @unique 
+  id                  String        @id @default(dbgenerated("gen_random_uuid()"))
+  patientId           String        @unique
   gender              Gender
   dateOfBirth         DateTime
   bloodGroup          BloodGroup
@@ -21,7 +21,7 @@ model PatientHealthData {
   updatedAt           DateTime      @updatedAt
 
   // Relations
-  patient Patient @relation(fields: [patientId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   @@map("patient_health_data")
 }

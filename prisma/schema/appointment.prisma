@@ -1,8 +1,8 @@
 model Appointment {
     id               String            @id @default(uuid(7))
-    patientId        String            
-    doctorId         String            
-    doctorScheduleId String            @unique 
+    patientId        String
+    doctorId         String
+    doctorScheduleId String            @unique
     videoCallingId   String
     status           AppointmentStatus @default(SCHEDULED)
     paymentStatus    PaymentStatus     @default(UNPAID)
@@ -10,9 +10,9 @@ model Appointment {
     updatedAt        DateTime          @updatedAt
 
     // relations
-    patient        Patient        @relation(fields: [patientId], references: [id])
-    doctor         Doctor         @relation(fields: [doctorId], references: [id])
-    doctorSchedule DoctorSchedule @relation(fields: [doctorScheduleId], references: [id])
+    patient        Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+    doctor         Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+    doctorSchedule DoctorSchedule @relation(fields: [doctorScheduleId], references: [id], onDelete: Cascade)
     // One appointment can have one payment, review, prescription, and medical report
     payment        Payment?
     review         Review?

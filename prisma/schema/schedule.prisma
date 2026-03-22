@@ -19,8 +19,8 @@ model DoctorSchedule {
     updatedAt DateTime @updatedAt
 
     // relations
-    doctor       Doctor        @relation(fields: [doctorId], references: [id])
-    schedule     Schedule      @relation(fields: [scheduleId], references: [id])
+    doctor       Doctor        @relation(fields: [doctorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    schedule     Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     appointments Appointment?
 
     @@unique([doctorId, scheduleId])

@@ -1915,7 +1915,9 @@ export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeo
 export const PrescriptionScalarFieldEnum = {
   id: 'id',
   appointmentId: 'appointmentId',
-  instruction: 'instruction',
+  patientId: 'patientId',
+  doctorId: 'doctorId',
+  instructions: 'instructions',
   followUpDate: 'followUpDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
