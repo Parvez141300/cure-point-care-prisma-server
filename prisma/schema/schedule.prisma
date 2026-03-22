@@ -11,8 +11,8 @@ model Schedule {
 
 model DoctorSchedule {
     id         String @id @default(uuid(7))
-    doctorId   String @db.Uuid
-    scheduleId String @db.Uuid
+    doctorId   String 
+    scheduleId String 
 
     isBooked  Boolean  @default(false)
     createdAt DateTime @default(now())

@@ -1,8 +1,8 @@
 model Review {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId     String   @db.Uuid
-  doctorId      String   @db.Uuid
-  appointmentId String   @unique @db.Uuid
+  id            String   @id @default(uuid(7)) 
+  patientId     String   
+  doctorId      String   
+  appointmentId String   @unique 
   rating        Float
   comment       String?
   createdAt     DateTime @default(now())

@@ -1,8 +1,8 @@
 model MedicalReport {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId     String   @db.Uuid
-  doctorId      String   @db.Uuid
-  appointmentId String   @unique @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) 
+  patientId     String   
+  doctorId      String   
+  appointmentId String   @unique 
   diagnosis     String
   treatment     String
   followUpDate  DateTime?

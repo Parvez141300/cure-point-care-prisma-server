@@ -1,8 +1,8 @@
 model Appointment {
     id               String            @id @default(uuid(7))
-    patientId        String            @db.Uuid
-    doctorId         String            @db.Uuid
-    doctorScheduleId String            @unique @db.Uuid
+    patientId        String            
+    doctorId         String            
+    doctorScheduleId String            @unique 
     videoCallingId   String
     status           AppointmentStatus @default(SCHEDULED)
     paymentStatus    PaymentStatus     @default(UNPAID)

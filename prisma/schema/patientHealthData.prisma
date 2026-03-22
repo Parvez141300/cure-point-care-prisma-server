@@ -1,6 +1,6 @@
 model PatientHealthData {
-  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  patientId           String        @unique @db.Uuid
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) 
+  patientId           String        @unique 
   gender              Gender
   dateOfBirth         DateTime
   bloodGroup          BloodGroup
