@@ -28,7 +28,8 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
 
 const createSuperAdmin = catchAsync(async (req: Request, res: Response) => {
     const payload = req.body;
-    const result = await UserService.createAdminInDB(payload);
+    console.log('payload of super admin', payload);
+    const result = await UserService.createSuperAdminInDB(payload);
     sendResponse(res, {
         httpStatusCode: status.CREATED,
         success: true,
