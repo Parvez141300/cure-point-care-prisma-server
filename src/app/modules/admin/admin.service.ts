@@ -3,6 +3,7 @@ import { Role } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IUpdateAdminPayload } from "./admin.interface";
+import { IRequestUser } from "../../interfaces/requestUser.interface";
 
 const getAllAdminFromDB = async () => {
     const admins = await prisma.user.findMany({
@@ -55,7 +56,7 @@ const updateAdminInDB = async (id: string, payload: IUpdateAdminPayload) => {
     return result;
 }
 
-const softDeleteAdminInDB = async (id: string) => {
+const softDeleteAdminInDB = async (id: string, user: IRequestUser) => {
     const admin = await prisma.admin.findUnique({
         where: {
             id: id,
@@ -63,6 +64,10 @@ const softDeleteAdminInDB = async (id: string) => {
     });
     if (!admin) {
         throw new AppError(status.NOT_FOUND, `Admin with id ${id} not found`);
+    }
+
+    if (admin.userId !== user.userId) {
+        throw new AppError(status.UNAUTHORIZED, `You can not delete yourself`);
     }
 
     const result = await prisma.admin.update({
