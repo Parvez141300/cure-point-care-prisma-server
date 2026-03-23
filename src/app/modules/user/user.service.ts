@@ -148,6 +148,7 @@ const createAdminInDB = async (payload: ICreateAdminPayload) => {
         throw error;
     }
 }
+
 const createSuperAdminInDB = async (payload: ICreateSuperAdminPayload) => {
     const {password, superAdmin} = payload;
     const userExists = await prisma.user.findUnique({
