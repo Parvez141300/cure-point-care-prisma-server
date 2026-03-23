@@ -166,7 +166,7 @@ const createSuperAdminInDB = async (payload: ICreateSuperAdminPayload) => {
             name: superAdmin.name,
             email: superAdmin.email,
             password,
-            role: Role.ADMIN,
+            role: Role.SUPER_ADMIN,
             needPasswordChange: true,
         }
     });
