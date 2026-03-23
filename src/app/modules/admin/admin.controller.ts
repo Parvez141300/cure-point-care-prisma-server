@@ -39,6 +39,7 @@ const updateAdmin = catchAsync(async (req: Request, res: Response) => {
 const softDeleteAdmin = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const user = req.user;
+    // console.log('user of soft delete service', user);
     const result = await AdminService.softDeleteAdminInDB(id as string, user);
     sendResponse(res, {
         httpStatusCode: 200,

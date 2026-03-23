@@ -57,6 +57,7 @@ const updateAdminInDB = async (id: string, payload: IUpdateAdminPayload) => {
 }
 
 const softDeleteAdminInDB = async (id: string, user: IRequestUser) => {
+    
     const admin = await prisma.admin.findUnique({
         where: {
             id: id,
@@ -66,7 +67,10 @@ const softDeleteAdminInDB = async (id: string, user: IRequestUser) => {
         throw new AppError(status.NOT_FOUND, `Admin with id ${id} not found`);
     }
 
-    if (admin.userId !== user.userId) {
+    console.log('admin data', admin);
+    console.log('user data', user);
+
+    if (admin.userId === user.userId) {
         throw new AppError(status.UNAUTHORIZED, `You can not delete yourself`);
     }
 

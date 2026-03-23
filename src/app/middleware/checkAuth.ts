@@ -31,6 +31,7 @@ export const checkAuth = (...authRoles: Role[]) => {
 
                 if (isExistSession && isExistSession.user) {
                     const user = isExistSession.user;
+                    console.log('user data from middleware', user);
 
                     const now = new Date();
                     const expiresAt = new Date(isExistSession.expiresAt);
@@ -61,11 +62,9 @@ export const checkAuth = (...authRoles: Role[]) => {
                         throw new Error("Forbidden Access you do not have the permission to access this resource");
                     }
 
-                    req.user = {
-                        userId: user.id,
-                        role: user.role,
-                        email: user.email,
-                    }
+
+
+                    // console.log('req user form middleware', req.user);
                 }
             }
 
@@ -81,6 +80,14 @@ export const checkAuth = (...authRoles: Role[]) => {
             if (!verifiedToken.success) {
                 throw new Error(verifiedToken.message);
             }
+
+            req.user = {
+                userId: verifiedToken.data!.userId,
+                role: verifiedToken.data!.role,
+                email: verifiedToken.data!.email,
+            }
+
+            console.log('verified token data', verifiedToken.data);
 
             if (authRoles.length > 0 && !authRoles.includes(verifiedToken.data!.role)) {
                 throw new Error('Unauthorized you do not have the permission to access this resource');
