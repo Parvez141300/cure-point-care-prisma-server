@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 import { Role, UserStatus } from "../../generated/prisma/enums";
 import ms, { StringValue } from "ms";
 import { envVars } from "../../config/env";
+import { bearer } from "better-auth/plugins";
 
 const convertMilisecondToSecond = (milisecond: number) => milisecond / 1000;
 
@@ -50,5 +51,6 @@ export const auth = betterAuth({
             enabled: true,
             maxAge: convertMilisecondToSecond(ms(envVars.BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN as StringValue)),
         }
-    }
+    },
+    plugins: [bearer()],
 });
