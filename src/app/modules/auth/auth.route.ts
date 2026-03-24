@@ -5,5 +5,6 @@ const router = Router();
 
 router.post("/register", AuthController.registerPatient);
 router.post("/login", AuthController.loginUser);
+router.post("/refresh-token", AuthController.getNewtoken);
 
 export const AuthRoute = router;
