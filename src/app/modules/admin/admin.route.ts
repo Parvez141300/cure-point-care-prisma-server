@@ -7,9 +7,9 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
-router.get("/", AdminController.getAllAdmin);
-router.get("/:id", AdminController.getAdminById);
-router.patch("/:id", validateRequest(updateAdminZodSchema), AdminController.updateAdmin);
-router.delete("/:id", checkAuth(Role.SUPER_ADMIN, Role.ADMIN), AdminController.softDeleteAdmin);
+router.get("/", checkAuth(Role.SUPER_ADMIN, Role.ADMIN), AdminController.getAllAdmin);
+router.get("/:id", checkAuth(Role.SUPER_ADMIN, Role.ADMIN), AdminController.getAdminById);
+router.patch("/:id", checkAuth(Role.SUPER_ADMIN), validateRequest(updateAdminZodSchema), AdminController.updateAdmin);
+router.delete("/:id", checkAuth(Role.SUPER_ADMIN), AdminController.softDeleteAdmin);
 
 export const AdminRoute = router;
