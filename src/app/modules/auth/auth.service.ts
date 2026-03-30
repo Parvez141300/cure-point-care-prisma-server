@@ -9,6 +9,7 @@ import { tokenUtils } from "../../utils/token";
 import { JwtPayload } from "jsonwebtoken";
 import ms, { StringValue } from "ms";
 import { IChangePasswordPayload, ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
+import { is } from "zod/locales";
 
 const registerPatientInDB = async (payload: IRegisterPatientPayload) => {
     const { name, email, password } = payload;
@@ -230,7 +231,7 @@ const verifyEmailInBetterAuth = async (email: string, otp: string) => {
         }
     });
 
-    if(result.status && !result.user.emailVerified){
+    if (result.status && !result.user.emailVerified) {
         await prisma.user.update({
             where: {
                 email: email,
@@ -242,6 +243,70 @@ const verifyEmailInBetterAuth = async (email: string, otp: string) => {
     }
 }
 
+const forgetPasswordInBetterAuth = async (email: string) => {
+    const isUserExists = await prisma.user.findUnique({
+        where: {
+            email: email,
+        }
+    });
+
+    if (!isUserExists) {
+        throw new AppError(status.NOT_FOUND, 'User not found with this email');
+    }
+
+    if (isUserExists && !isUserExists.emailVerified) {
+        throw new AppError(status.BAD_REQUEST, 'Email is not verified. Please verify your email first');
+    }
+
+    if (isUserExists && isUserExists.status === UserStatus.DELETED) {
+        throw new AppError(status.BAD_REQUEST, 'User is deleted. Please contact support');
+    }
+
+    const result = await auth.api.requestPasswordResetEmailOTP({
+        body: {
+            email,
+        }
+    });
+
+    return result;
+}
+
+const resetPasswordInBetterAuth = async (email: string, otp: string, newPassword: string) => {
+    const isUserExists = await prisma.user.findUnique({
+        where: {
+            email: email,
+        }
+    });
+
+    if (!isUserExists) {
+        throw new AppError(status.NOT_FOUND, 'User not found with this email');
+    }
+
+    if (isUserExists && !isUserExists.emailVerified) {
+        throw new AppError(status.BAD_REQUEST, 'Email is not verified. Please verify your email first');
+    }
+
+    if (isUserExists && isUserExists.status === UserStatus.DELETED) {
+        throw new AppError(status.BAD_REQUEST, 'User is deleted. Please contact support');
+    }
+
+    const result = await auth.api.resetPasswordEmailOTP({
+        body: {
+            email: email,
+            otp: otp,
+            password: newPassword,
+        }
+    });
+
+    await prisma.session.deleteMany({
+        where: {
+            userId: isUserExists.id,
+        }
+    });
+
+    return result;
+}
+
 export const AuthService = {
     registerPatientInDB,
     loginUserInDB,
@@ -249,4 +314,6 @@ export const AuthService = {
     changePasswordInDB,
     logoutUserInDB,
     verifyEmailInBetterAuth,
+    forgetPasswordInBetterAuth,
+    resetPasswordInBetterAuth,
 }

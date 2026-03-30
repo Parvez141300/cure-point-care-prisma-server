@@ -81,6 +81,20 @@ export const auth = betterAuth({
                         })
                     }
                 }
+                else if (type === "forget-password"){
+                    const user = await prisma.user.findUnique({ where: { email } });
+                    if(user){
+                        sendEmail({
+                            to: email,
+                            subject: "Your OTP for Password Reset",
+                            templateName: "otp",
+                            templateData: {
+                                name: user.name,
+                                otp: otp,
+                            }
+                        })
+                    }
+                }
             },
             expiresIn: 2 * 60, // OTP expires in 2 minutes
             otpLength: 6, // OTP length of 6 digits
