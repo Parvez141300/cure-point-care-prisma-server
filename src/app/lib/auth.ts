@@ -10,12 +10,29 @@ import { sendEmail } from "../utils/email";
 const convertMilisecondToSecond = (milisecond: number) => milisecond / 1000;
 
 export const auth = betterAuth({
+    baseURL: envVars.BETTER_AUTH_URL as string,
+    secret: envVars.BETTER_AUTH_SECRET as string,
     database: prismaAdapter(prisma, {
         provider: "postgresql", // or "mysql", "postgresql", ...etc
     }),
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
+    },
+    socialProviders: {
+        google: {
+            clientId: envVars.GOOGLE_CLIENT_ID as string,
+            clientSecret: envVars.GOOGLE_CLIENT_SECRET as string,
+            mapProfileToUser: () => {
+                return {
+                    role: Role.PATIENT,
+                    status: UserStatus.ACTIVE,
+                    needPasswordChange: false,
+                    isDeleted: false,
+                    deletedAt: null,
+                };
+            },
+        }
     },
     emailVerification: {
         sendOnSignUp: true,
@@ -66,10 +83,10 @@ export const auth = betterAuth({
             async sendVerificationOTP({ email, otp, type }) {
                 console.log(`Sending OTP ${otp} to email ${email} for ${type}`);
                 // You can integrate your email sending service here to send the OTP to the user's email address.
-                if(type === "email-verification"){
+                if (type === "email-verification") {
                     const user = await prisma.user.findUnique({ where: { email } });
 
-                    if(user && !user.emailVerified){
+                    if (user && !user.emailVerified) {
                         sendEmail({
                             to: email,
                             subject: "Your OTP for Email Verification",
@@ -81,9 +98,9 @@ export const auth = betterAuth({
                         })
                     }
                 }
-                else if (type === "forget-password"){
+                else if (type === "forget-password") {
                     const user = await prisma.user.findUnique({ where: { email } });
-                    if(user){
+                    if (user) {
                         sendEmail({
                             to: email,
                             subject: "Your OTP for Password Reset",
@@ -100,4 +117,26 @@ export const auth = betterAuth({
             otpLength: 6, // OTP length of 6 digits
         }),
     ],
+    advanced: {
+        useSecureCookies: false,
+        // disableCSRFCheck: true,
+        cookies: {
+            state: {
+                attributes: {
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                    path: "/",
+                },
+            },
+            sessionToken: {
+                attributes: {
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                    path: "/",
+                }
+            },
+        },
+    }
 });
