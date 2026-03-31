@@ -9,7 +9,6 @@ import { tokenUtils } from "../../utils/token";
 import { JwtPayload } from "jsonwebtoken";
 import ms, { StringValue } from "ms";
 import { IChangePasswordPayload, ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
-import { is } from "zod/locales";
 
 const registerPatientInDB = async (payload: IRegisterPatientPayload) => {
     const { name, email, password } = payload;
@@ -194,6 +193,17 @@ const changePasswordInDB = async (payload: IChangePasswordPayload, sessionToken:
         }),
     });
 
+    if (session.user.needPasswordChange) {
+        await prisma.user.update({
+            where: {
+                id: session.user.id,
+            },
+            data: {
+                needPasswordChange: false,
+            }
+        });
+    }
+
     const accessToken = tokenUtils.getAccessToken({
         userId: session.user.id,
         name: session.user.name,
@@ -297,6 +307,17 @@ const resetPasswordInBetterAuth = async (email: string, otp: string, newPassword
             password: newPassword,
         }
     });
+
+    if (isUserExists.needPasswordChange) {
+        await prisma.user.update({
+            where: {
+                email: email,
+            },
+            data: {
+                needPasswordChange: false,
+            }
+        });
+    }
 
     await prisma.session.deleteMany({
         where: {
