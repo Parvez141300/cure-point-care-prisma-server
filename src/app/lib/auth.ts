@@ -138,5 +138,9 @@ export const auth = betterAuth({
                 }
             },
         },
-    }
+    },
+    redirectURLs: {
+        signIn: `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`,
+    },
+    trustedOrigins: [envVars.FRONTEND_URL as string, envVars.BETTER_AUTH_URL as string, "http://localhost:3000", "http://localhost:5000"],
 });
