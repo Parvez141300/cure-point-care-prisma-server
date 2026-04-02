@@ -181,6 +181,16 @@ const changePasswordInDB = async (payload: IChangePasswordPayload, sessionToken:
         throw new AppError(status.UNAUTHORIZED, 'Invalid session token');
     };
 
+    const account = await prisma.account.findFirst({
+        where: {
+            userId: session.user.id
+        }
+    });
+
+    if (account?.providerId === "google") {
+        throw new AppError(status.BAD_REQUEST, 'Password change is not allowed for Google login users');
+    }
+
     const { currentPassword, newPassword } = payload;
 
     const result = await auth.api.changePassword({
@@ -273,6 +283,16 @@ const forgetPasswordInBetterAuth = async (email: string) => {
         throw new AppError(status.BAD_REQUEST, 'User is deleted. Please contact support');
     }
 
+    const account = await prisma.account.findFirst({
+        where: {
+            userId: isUserExists.id,
+        }
+    });
+
+    if (account?.providerId === "google") {
+        throw new AppError(status.BAD_REQUEST, 'Password reset is not allowed for Google login users');
+    }
+
     const result = await auth.api.requestPasswordResetEmailOTP({
         body: {
             email,
@@ -299,6 +319,16 @@ const resetPasswordInBetterAuth = async (email: string, otp: string, newPassword
 
     if (isUserExists && isUserExists.status === UserStatus.DELETED) {
         throw new AppError(status.BAD_REQUEST, 'User is deleted. Please contact support');
+    }
+
+    const account = await prisma.account.findFirst({
+        where: {
+            userId: isUserExists.id,
+        }
+    });
+
+    if (account?.providerId === "google") {
+        throw new AppError(status.BAD_REQUEST, 'Password reset is not allowed for Google login users');
     }
 
     const result = await auth.api.resetPasswordEmailOTP({
