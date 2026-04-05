@@ -6,7 +6,11 @@ import { sendResponse } from "../../shared/sendReponse";
 import status from "http-status";
 
 const createSpeciality = catchAsync(async (req: Request, res: Response) => {
-    const payload = req.body;
+    const payload = {
+        ...req.body,
+        icon: req.file?.path,
+    };
+    console.log('payload of the cloudinary file: ', payload);
     const result = await SpecialityService.createSpecialityInDB(payload);
     sendResponse(res, {
         httpStatusCode: status.CREATED,

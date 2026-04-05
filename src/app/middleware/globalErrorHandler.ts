@@ -7,14 +7,24 @@ import z from "zod";
 import { IErrorResponse, IErrorSources } from "../interfaces/error.interface";
 import AppError from "../errorHelpers/AppError";
 import { handleZodError } from "../errorHelpers/HandleZodError";
+import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
 
 
 
-export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-    let stack : string | undefined = undefined
+export const globalErrorHandler = async (err: any, req: Request, res: Response, next: NextFunction) => {
+    let stack: string | undefined = undefined
 
     if (envVars.NODE_ENV === "development") {
         console.log('Error from Global error handler: ', err);
+    }
+
+    if (req.file) {
+        await deleteFileFromCloudinary(req.file.path);
+    }
+
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        const imageUrls = req.files.map((file: any) => file.path);
+        await Promise.all(imageUrls.map((url: string) => deleteFileFromCloudinary(url)));
     }
 
     let errorSources: IErrorSources[] = [];
@@ -40,7 +50,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
     ] */
 
     if (err instanceof z.ZodError) {
-        const simpifiedZodError= handleZodError(err);
+        const simpifiedZodError = handleZodError(err);
         statusCode = simpifiedZodError.statusCode as number;
         message = simpifiedZodError.message;
 
@@ -69,7 +79,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
         ]
     }
 
-    const errorResponse : IErrorResponse = {
+    const errorResponse: IErrorResponse = {
         success: false,
         message: message,
         errorSources,
