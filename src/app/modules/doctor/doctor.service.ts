@@ -1,3 +1,4 @@
+
 import { prisma } from "../../lib/prisma";
 import { IUpdateDoctorPayload } from "./doctor.interface";
 
@@ -17,6 +18,23 @@ const getAllDoctorsFromDB = async () => {
     });
     return doctors;
 }
+
+// const getAllDoctorsFromDB = async (query: IQueryParams) => {
+//     const queryBuilder = new QueryBuilder<Doctor, Prisma.DoctorWhereInput, Prisma.DoctorInclude>(prisma.doctor, query, {
+//         searchableFields: doctorSearchableFields,
+//         filterableFields: doctorFilterableFields,
+//     });
+
+//     const result = await queryBuilder.search().filter().where({
+//         isDeleted: false,
+//     }).include({
+//         user: true,
+//         specialities: true,
+//         appointments: true,
+//         doctorSchedules: true,
+//         reviews: true,
+//     });
+// }
 
 const getDoctorByIdFromDB = async (id: string) => {
     const doctor = await prisma.doctor.findUnique({
@@ -81,7 +99,7 @@ const updateDoctorInDB = async (id: string, payload: IUpdateDoctorPayload) => {
                     }
                 });
             }
-            
+
             if (toAdd && toAdd?.length > 0) {
                 await tx.doctorSpeciality.createMany({
                     data: toAdd.map(specialityId => (
