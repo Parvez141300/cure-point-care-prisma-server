@@ -16,8 +16,8 @@ const createDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
-
-    const result = await DoctorScheduleService.getMyDoctorScheduleFromDB();
+    const user = req.user;
+    const result = await DoctorScheduleService.getMyDoctorScheduleFromDB(user);
     sendResponse(res, {
         httpStatusCode: 200,
         success: true,
@@ -61,7 +61,8 @@ const updateMyDoctorSchedule = catchAsync(async (req: Request, res: Response) =>
 
 const deleteMyDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    await DoctorScheduleService.deleteMyDoctorScheduleFromDB(id as string);
+    const user = req.user;
+    await DoctorScheduleService.deleteMyDoctorScheduleFromDB(id as string, user);
     sendResponse(res, {
         httpStatusCode: 200,
         success: true,

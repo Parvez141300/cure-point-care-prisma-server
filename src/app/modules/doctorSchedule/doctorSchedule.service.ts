@@ -21,13 +21,52 @@ const createDoctorScheduleInDB = async (user: IRequestUser, payload: ICreateDoct
     return result;
 }
 
-const getMyDoctorScheduleFromDB = async () => { }
+const getMyDoctorScheduleFromDB = async (user: IRequestUser) => {
+    const doctorData = await prisma.doctor.findUniqueOrThrow({
+        where: {
+            userId: user.userId
+        }
+    });
 
-const getAllDoctorScheduleFromDB = async () => { }
+    const result = await prisma.doctorSchedule.findMany({
+        where: {
+            doctorId: doctorData.id
+        },
+        include: {
+            schedule: true
+        }
+    });
 
-const getDoctorScheduleByIdFromDB = async (doctorId: string, scheduleId: string) => { }
+    return result;
+}
 
-const updateMyDoctorScheduleInDB = async ( user: IRequestUser, payload: IUpdateDoctorSchedulePayload) => {
+const getAllDoctorScheduleFromDB = async () => {
+    const result = await prisma.doctorSchedule.findMany({
+        include: {
+            schedule: true
+        }
+    });
+
+    return result;
+}
+
+const getDoctorScheduleByIdFromDB = async (doctorId: string, scheduleId: string) => {
+    const result = await prisma.doctorSchedule.findUnique({
+        where: {
+            doctorId_scheduleId: {
+                doctorId,
+                scheduleId
+            }
+        },
+        include: {
+            schedule: true
+        }
+    });
+
+    return result;
+}
+
+const updateMyDoctorScheduleInDB = async (user: IRequestUser, payload: IUpdateDoctorSchedulePayload) => {
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             userId: user.userId
@@ -63,7 +102,21 @@ const updateMyDoctorScheduleInDB = async ( user: IRequestUser, payload: IUpdateD
     return result;
 }
 
-const deleteMyDoctorScheduleFromDB = async (scheduleId: string) => { }
+const deleteMyDoctorScheduleFromDB = async (scheduleId: string, user: IRequestUser) => {
+    await prisma.doctor.findUniqueOrThrow({
+        where: {
+            userId: user.userId
+        }
+    });
+
+    const result = await prisma.doctorSchedule.deleteMany({
+        where: {
+            scheduleId
+        }
+    });
+
+    return result;
+}
 
 export const DoctorScheduleService = {
     createDoctorScheduleInDB,
