@@ -2,12 +2,69 @@ import { uuidv7 } from "zod";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { IBookAppointmentPayload } from "./appointment.interface";
+import { AppointmentStatus, Role } from "../../../generated/prisma/enums";
+import AppError from "../../errorHelpers/AppError";
+import status from "http-status";
 
 const getAllAppointmentFromDB = async () => { };
 
-const getMyAppointmentsFromDB = async (id: string) => { };
+const getMyAppointmentsFromDB = async (user: IRequestUser) => {
+  const patientData = await prisma.patient.findUnique({
+    where: {
+      email: user.email,
+    }
+  });
 
-const getSingleAppointmentFromDB = async (id: string) => { };
+  const doctorData = await prisma.doctor.findUnique({
+    where: {
+      email: user.email,
+    }
+  });
+
+  if (patientData) {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        patientId: patientData.id,
+      },
+      include: {
+        doctor: true,
+        patient: true,
+        doctorSchedule: {
+          include: {
+            schedule: true,
+          }
+        },
+      }
+    });
+
+    return appointments;
+  }
+  else if (doctorData) {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctorData.id,
+      },
+      include: {
+        doctor: true,
+        patient: true,
+        doctorSchedule: {
+          include: {
+            schedule: true,
+          }
+        },
+      }
+    });
+
+    return appointments;
+  }
+  else {
+    throw new Error("User not found");
+  }
+
+  return [];
+};
+
+const getSingleAppointmentFromDB = async (appointmentId: string) => { };
 
 const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequestUser) => {
   const patientData = await prisma.patient.findUniqueOrThrow({
@@ -45,7 +102,7 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
         doctorId: doctorData.id,
         patientId: patientData.id,
         doctorScheduleId: doctorSchedule.id,
-        videoCallingId,
+        videoCallingId: videoCallingId,
       }
     });
 
@@ -69,7 +126,70 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
   return result;
 };
 
-const changeAppointmentStatusInDB = async (id: string, status: string) => { };
+const changeAppointmentStatusInDB = async (appointmentId: string, appointmentStatus: AppointmentStatus, user: IRequestUser) => {
+  const appointmentData = await prisma.appointment.findUniqueOrThrow({
+    where: {
+      id: appointmentId,
+    },
+    include: {
+      doctor: true,
+    }
+  });
+
+  if (user.role === Role.DOCTOR) {
+    if (user.email !== appointmentData.doctor.email) {
+      throw new AppError(status.BAD_REQUEST, "This is not your appointment");
+    }
+  }
+
+  // for patient update
+  if (user.role === Role.PATIENT) {
+    if(appointmentData.status === AppointmentStatus.COMPLETED || appointmentData.status === AppointmentStatus.CANCELED) {
+      throw new AppError(status.BAD_REQUEST, "Appointment already completed/cancelled");
+    }
+    const result = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        status: appointmentStatus,
+      }
+    });
+
+    return result;
+  }
+
+  // for doctor update
+  if(user.role === Role.DOCTOR){
+    if(appointmentData.status === AppointmentStatus.COMPLETED || appointmentData.status === AppointmentStatus.CANCELED) {
+      throw new AppError(status.BAD_REQUEST, "Appointment already completed/cancelled");
+    }
+    const result = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        status: appointmentStatus,
+      }
+    });
+
+    return result;
+  }
+
+  // for admin and super admin update
+  if(user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN){
+    const result = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        status: appointmentStatus,
+      }
+    });
+
+    return result;
+  }
+};
 
 
 export const AppointmentService = {

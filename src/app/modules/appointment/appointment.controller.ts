@@ -15,8 +15,8 @@ const getAllAppointments = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyAppointments = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const result = await AppointmentService.getMyAppointmentsFromDB(id as string);
+    const user = req.user;
+    const result = await AppointmentService.getMyAppointmentsFromDB(user);
     sendResponse(res, {
         httpStatusCode: status.CREATED,
         success: true,
@@ -50,8 +50,9 @@ const bookAppointment = catchAsync(async (req: Request, res: Response) => {
 
 const changeAppointmentStatus = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { status } = req.body;
-    const result = await AppointmentService.changeAppointmentStatusInDB(id as string, status);
+    const { appointmentStatus } = req.body;
+    const user = req.user;
+    const result = await AppointmentService.changeAppointmentStatusInDB(id as string, appointmentStatus, user);
     sendResponse(res, {
         httpStatusCode: status.CREATED,
         success: true,
