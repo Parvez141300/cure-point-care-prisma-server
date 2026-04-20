@@ -37,12 +37,13 @@ const getSingleAppointment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const bookAppointment = catchAsync(async (req: Request, res: Response) => {
-    const appointmentData = req.body;
-    const result = await AppointmentService.bookAppointmentInDB(appointmentData);
+    const payload = req.body;
+    const user = req.user;
+    const result = await AppointmentService.bookAppointmentInDB(payload, user);
     sendResponse(res, {
         httpStatusCode: status.CREATED,
         success: true,
-        message: "Fetched Appointments successfully",
+        message: "Booked Appointments successfully",
         data: result,
     })
 });

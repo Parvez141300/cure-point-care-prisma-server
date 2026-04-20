@@ -2,7 +2,7 @@ model Doctor {
     id String @id @default(uuid(7))
 
     name                String
-    email               String
+    email               String  @unique
     profilePhoto        String
     contactNumber       String
     registrationNumber  String
@@ -24,12 +24,12 @@ model Doctor {
     userId String @unique
     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    specialities DoctorSpeciality[]
-    appointments Appointment[]
+    specialities    DoctorSpeciality[]
+    appointments    Appointment[]
     doctorSchedules DoctorSchedule[]
-    reviews      Review[]
-    medicalReports MedicalReport[]
-    prescriptions Prescription[]
+    reviews         Review[]
+    medicalReports  MedicalReport[]
+    prescriptions   Prescription[]
 
     @@index([email], name: "idx_doctor_email")
     @@index([isDeleted], name: "idx_doctor_isDeleted")
