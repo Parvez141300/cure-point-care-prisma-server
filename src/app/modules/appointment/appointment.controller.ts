@@ -27,7 +27,8 @@ const getMyAppointments = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleAppointment = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await AppointmentService.getSingleAppointmentFromDB(id as string);
+    const user = req.user;
+    const result = await AppointmentService.getSingleAppointmentFromDB(id as string, user);
     sendResponse(res, {
         httpStatusCode: status.CREATED,
         success: true,

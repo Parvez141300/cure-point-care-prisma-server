@@ -6,7 +6,21 @@ import { AppointmentStatus, Role } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import status from "http-status";
 
-const getAllAppointmentFromDB = async () => { };
+const getAllAppointmentFromDB = async () => { 
+  const appointments = await prisma.appointment.findMany({
+    include: {
+      doctor: true,
+      patient: true,
+      doctorSchedule: {
+        include: {
+          schedule: true,
+        }
+      }
+    }
+  });
+
+  return appointments;
+};
 
 const getMyAppointmentsFromDB = async (user: IRequestUser) => {
   const patientData = await prisma.patient.findUnique({
@@ -64,7 +78,61 @@ const getMyAppointmentsFromDB = async (user: IRequestUser) => {
   return [];
 };
 
-const getSingleAppointmentFromDB = async (appointmentId: string) => { };
+const getSingleAppointmentFromDB = async (appointmentId: string, user:IRequestUser) => {
+  const patientData = await prisma.patient.findUnique({
+    where: {
+      email: user.email,
+    }
+  });
+
+  const doctorData = await prisma.doctor.findUnique({
+    where: {
+      email: user.email,
+    }
+  });
+
+  if(patientData) {
+    const appointment = await prisma.appointment.findUniqueOrThrow({
+      where: {
+        id: appointmentId,
+        patientId: patientData.id,
+      },
+      include: {
+        doctor: true,
+        patient: true,
+        doctorSchedule: {
+          include: {
+            schedule: true,
+          }
+        },
+      }
+    });
+
+    return appointment;
+  }
+  else if(doctorData) {
+    const appointment = await prisma.appointment.findUniqueOrThrow({
+      where: {
+        id: appointmentId,
+        doctorId: doctorData.id,
+      },
+      include: {
+        doctor: true,
+        patient: true,
+        doctorSchedule: {
+          include: {
+            schedule: true,
+          }
+        },
+      }
+    });
+
+    return appointment;
+  }
+  else {
+    throw new Error("User not found");
+  }
+ };
 
 const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequestUser) => {
   const patientData = await prisma.patient.findUniqueOrThrow({
