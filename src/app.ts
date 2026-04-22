@@ -8,11 +8,15 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./app/lib/auth";
 import path from "path";
 import { envVars } from "./config/env";
+import { PaymentController } from "./app/modules/payment/payment.controller";
 
 const app: Application = express();
 
 app.set("view engine", "ejs");
 app.set("views", path.resolve(process.cwd(), "src/app/templates"));
+
+// stripe webhook
+app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
 
 // middleware
 app.use("/api/auth", toNodeHandler(auth));
