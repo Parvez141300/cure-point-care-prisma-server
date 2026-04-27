@@ -3,11 +3,11 @@ model Admin {
     userId        String  @unique
     name          String
     email         String  @unique
-    profilePhoto  String
-    contactNumber String
-    address       String
+    profilePhoto  String?
+    contactNumber String?
+    address       String?
     experience    Float   @default(0)
-    gender        Gender
+    gender        Gender  @default(MALE)
     isDeleted     Boolean @default(false)
 
     deletedAt DateTime?

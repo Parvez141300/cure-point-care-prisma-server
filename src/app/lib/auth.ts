@@ -86,13 +86,23 @@ export const auth = betterAuth({
                 if (type === "email-verification") {
                     const user = await prisma.user.findUnique({ where: { email } });
 
+                    if (!user) {
+                        console.log(`User with email ${email} not found. so cannot send email verification OTP`);
+                        return;
+                    }
+
+                    if (user && user.role === Role.SUPER_ADMIN) {
+                        console.log(`User with email ${email} is super admin. so cannot send email verification OTP`);
+                        return;
+                    }
+
                     if (user && !user.emailVerified) {
                         sendEmail({
                             to: email,
                             subject: "Your OTP for Email Verification",
                             templateName: "otp",
                             templateData: {
-                                name: user.name,
+                                name: user?.name,
                                 otp: otp,
                             }
                         })

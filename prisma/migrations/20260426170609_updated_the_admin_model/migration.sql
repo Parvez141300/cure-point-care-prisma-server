@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "admin" ALTER COLUMN "profilePhoto" DROP NOT NULL,
+ALTER COLUMN "contactNumber" DROP NOT NULL,
+ALTER COLUMN "address" DROP NOT NULL,
+ALTER COLUMN "gender" SET DEFAULT 'MALE';
