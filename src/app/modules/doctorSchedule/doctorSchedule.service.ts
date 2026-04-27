@@ -103,15 +103,28 @@ const updateMyDoctorScheduleInDB = async (user: IRequestUser, payload: IUpdateDo
 }
 
 const deleteMyDoctorScheduleFromDB = async (scheduleId: string, user: IRequestUser) => {
-    await prisma.doctor.findUniqueOrThrow({
+    const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             userId: user.userId
         }
     });
 
+    const schedule = await prisma.doctorSchedule.findFirst({
+        where: {
+            scheduleId: scheduleId,
+        }
+    });
+
+    // check isBooked
+    if (!schedule || schedule.isBooked) {
+        throw new Error("This schedule is already booked and cannot be deleted or this schedule does not exist.");
+    }
+
     const result = await prisma.doctorSchedule.deleteMany({
         where: {
-            scheduleId
+            scheduleId,
+            doctorId: doctorData.id,
+            isBooked: false,
         }
     });
 
