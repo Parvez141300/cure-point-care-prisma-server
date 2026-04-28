@@ -369,8 +369,8 @@ const initiatePaymentInDB = async (appointmentId: string, user: IRequestUser) =>
       appointmentId: appointmentData.id,
       paymentId: appointmentData.payment?.id,
     },
-    success_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-success`,
-    cancel_url: `${envVars.FRONTEND_URL}/dashboard/appointments`,
+    success_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-success?appointmentId=${appointmentData.id}&paymentId=${appointmentData.payment?.id}`,
+    cancel_url: `${envVars.FRONTEND_URL}/dashboard/appointments?error=Payment_cancelled`,
   });
 
   return ({
