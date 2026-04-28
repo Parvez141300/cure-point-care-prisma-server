@@ -1,4 +1,5 @@
-import { uuidv7 } from "zod";
+// import { uuidv7 } from "zod";
+import { v7 as uuidv7 } from "uuid";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { IBookAppointmentPayload } from "./appointment.interface";
@@ -164,6 +165,10 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
     }
   });
 
+  if (doctorSchedule.isBooked) {
+    throw new AppError(status.BAD_REQUEST, "This schedule is already been booked.");
+  }
+
   const videoCallingId = String(uuidv7());
 
   const result = await prisma.$transaction(async (tx) => {
@@ -174,7 +179,6 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
         patientId: patientData.id,
         doctorScheduleId: doctorSchedule.id,
         videoCallingId: videoCallingId,
-        paymentStatus: PaymentStatus.PAID,
       }
     });
 
@@ -197,7 +201,6 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
         appointmentId: appointmentData.id,
         transactionId: transactionId,
         amount: doctorData.appointmentFee,
-        status: PaymentStatus.PAID,
       }
     });
 
@@ -211,7 +214,7 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
             product_data: {
               name: `Appointment with ${doctorData.name}`,
             },
-            unit_amount: doctorData.appointmentFee * 120,
+            unit_amount: doctorData.appointmentFee * 100,
           },
           quantity: 1,
         }
@@ -220,8 +223,8 @@ const bookAppointmentInDB = async (payload: IBookAppointmentPayload, user: IRequ
         appointmentId: appointmentData.id,
         paymentId: paymentData.id,
       },
-      success_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-success`,
-      cancel_url: `${envVars.FRONTEND_URL}/dashboard/appointments`,
+      success_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-success?appointmentId=${appointmentData.id}&paymentId=${paymentData.id}`,
+      cancel_url: `${envVars.FRONTEND_URL}/dashboard/appointments?error=Payment_cancelled`,
     });
 
     return {
@@ -264,6 +267,10 @@ const bookAppointmentWithPayLaterInDB = async (payload: IBookAppointmentPayload,
       scheduleId: scheduleData.id,
     }
   });
+
+  if (doctorSchedule.isBooked) {
+    throw new AppError(status.BAD_REQUEST, "This schedule is already been booked.");
+  }
 
   const videoCallingId = String(uuidv7());
 
@@ -353,7 +360,7 @@ const initiatePaymentInDB = async (appointmentId: string, user: IRequestUser) =>
           product_data: {
             name: `Appointment with ${appointmentData.doctor.name}`,
           },
-          unit_amount: appointmentData.doctor.appointmentFee * 120,
+          unit_amount: appointmentData.doctor.appointmentFee * 100,
         },
         quantity: 1,
       }
