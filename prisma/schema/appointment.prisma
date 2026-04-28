@@ -17,7 +17,6 @@ model Appointment {
     payment        Payment?
     review         Review?
     prescription   Prescription?
-    medicalReport  MedicalReport?
 
     @@map("appointments")
 }

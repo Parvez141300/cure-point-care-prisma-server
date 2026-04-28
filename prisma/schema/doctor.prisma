@@ -28,7 +28,6 @@ model Doctor {
     appointments    Appointment[]
     doctorSchedules DoctorSchedule[]
     reviews         Review[]
-    medicalReports  MedicalReport[]
     prescriptions   Prescription[]
 
     @@index([email], name: "idx_doctor_email")
