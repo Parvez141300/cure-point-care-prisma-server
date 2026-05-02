@@ -44,20 +44,35 @@ const updateAdminInDB = async (id: string, payload: IUpdateAdminPayload) => {
         throw new AppError(status.NOT_FOUND, `Admin with id ${id} not found`);
     }
 
-    const result = await prisma.admin.update({
-        where: {
-            id: id,
-        },
-        data: {
-            ...payload,
-        }
+    const result = await prisma.$transaction(async (tx) => {
+        const admin = await tx.admin.update({
+            where: {
+                id: id,
+            },
+            data: {
+                ...payload,
+            }
+        });
+        const user = await tx.user.update({
+            where: {
+                id: admin.userId,
+            },
+            data: {
+                name: payload.name ? payload.name : admin.name,
+                image: payload.profilePhoto ? payload.profilePhoto : admin.profilePhoto,
+            }
+        });
+        return {
+            admin,
+            user,
+        };
     });
 
     return result;
 }
 
 const softDeleteAdminInDB = async (id: string, user: IRequestUser) => {
-    
+
     const admin = await prisma.admin.findUnique({
         where: {
             id: id,
