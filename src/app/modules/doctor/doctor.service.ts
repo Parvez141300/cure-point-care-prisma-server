@@ -1,5 +1,5 @@
 
-import { IRequestUser } from "../../interfaces/requestUser.interface";
+
 import { prisma } from "../../lib/prisma";
 import { IUpdateDoctorPayload } from "./doctor.interface";
 
