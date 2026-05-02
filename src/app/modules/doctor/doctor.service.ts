@@ -1,4 +1,5 @@
 
+import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { IUpdateDoctorPayload } from "./doctor.interface";
 
@@ -76,6 +77,18 @@ const updateDoctorInDB = async (id: string, payload: IUpdateDoctorPayload) => {
                 ...doctorData,
             }
         });
+
+        // update user information
+        await tx.user.update({
+            where: {
+                id: doctor.userId,
+            },
+            data: {
+                name: doctorData.name ? doctorData.name : isExistDoctor.name,
+                image: doctorData.profilePhoto ? doctorData.profilePhoto : isExistDoctor.profilePhoto,
+            }
+        });
+
         if (specialities && specialities.length) {
             // doctor existing specialities
             const existingDoctorSpecialities = await tx.doctorSpeciality.findMany({
