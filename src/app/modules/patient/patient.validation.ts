@@ -1,7 +1,7 @@
 import z from "zod";
 import { BloodGroup, Gender, MaritalStatus } from "../../../generated/prisma/enums";
 
-export const updatePatientZodSchema = z.object({
+const updatePatientZodSchema = z.object({
     patientInfo: z.object({
         name: z.string("Name must be string").min(1, "Name is required").max(100, "Name must be at most 100 characters long").optional(),
         profilePhoto: z.string("Profile Photo must be string").min(1, "Profile Photo is required").max(1000, "Profile Photo must be at most 1000 characters long").optional(),
@@ -56,5 +56,9 @@ export const updatePatientZodSchema = z.object({
 
             return true;
         }
-    }, {message: "Invalid report data"}).optional(),
+    }, { message: "Invalid report data" }).optional(),
 });
+
+export const PatientValidation = {
+    updatePatientZodSchema,
+}

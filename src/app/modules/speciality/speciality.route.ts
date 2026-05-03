@@ -16,6 +16,6 @@ router.post("/",
     validateRequest(SpecialityValidation.createSpecialityZodSchema),
     SpecialityController.createSpeciality);
 router.patch("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), SpecialityController.updateSpeciality);
-router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), SpecialityController.deleteSpeciality);
+router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), SpecialityController.deleteSpeciality); 
 
 export const SpecialityRoute = router;
