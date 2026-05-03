@@ -11,7 +11,18 @@ const getAllReviewsFromDB = async () => {
 };
 
 const getMyReviewsFromDB = async (user: IRequestUser) => {
+    const patientData = await prisma.patient.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+    });
 
+    const result = await prisma.review.findMany({
+        where: {
+            patientId: patientData.id,
+        },
+    });
+    return result;
 }
 
 const createReviewInDB = async (user: IRequestUser, payload: ICreateReviewPayload) => {

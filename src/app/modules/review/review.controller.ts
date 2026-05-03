@@ -14,6 +14,17 @@ const getAllReviews = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getMyReviews = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user;
+    const result = await ReviewService.getMyReviewsFromDB(user);
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Reviews fetched successfully",
+        data: result,
+    });
+});
+
 const createReview = catchAsync(async (req: Request, res: Response) => {
     const user = req.user;
     const payload = req.body;
@@ -28,5 +39,6 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
 
 export const ReviewController = {
     getAllReviews,
+    getMyReviews,
     createReview,
 };
