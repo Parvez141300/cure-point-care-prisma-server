@@ -1,3 +1,4 @@
+import { deleteFileFromCloudinary } from "../../../config/cloudinary.config";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { IUpdatePatientHealthInfoPayload, IUpdatePatientProfilePayload } from "./patient.interface";
@@ -5,6 +6,9 @@ import { convertDateTime } from "./patient.utils";
 
 const updateMyProfileInDB = async (user: IRequestUser, payload: IUpdatePatientProfilePayload) => {
     const { patientInfo, patientHealthInfo, medicalReports } = payload;
+    console.log('patient info', patientInfo);
+    console.log('patient info', patientHealthInfo);
+    console.log('patient info', medicalReports);
 
     const patientData = await prisma.patient.findUniqueOrThrow({
         where: {
@@ -64,11 +68,15 @@ const updateMyProfileInDB = async (user: IRequestUser, payload: IUpdatePatientPr
         if (medicalReports && Array.isArray(medicalReports) && medicalReports.length > 0) {
             for (const report of medicalReports) {
                 if (report.shouldDelete && report.reportId) {
-                    await tx.medicalReport.delete({
+                    const deletedReport = await tx.medicalReport.delete({
                         where: {
                             id: report.reportId,
                         }
                     });
+
+                    if(deletedReport.reportLink) {
+                        await deleteFileFromCloudinary(deletedReport.reportLink);
+                    }
                 } else if (report.reportName && report.reportLink) {
                     await tx.medicalReport.create({
                         data: {
