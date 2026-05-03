@@ -104,14 +104,36 @@ const updateReviewInDB = async (id: string, user: IRequestUser, payload: IUpdate
         },
     });
 
-    const result = await prisma.review.update({
-        where: {
-            id: reviewData.id,
-        },
-        data: {
-            rating: payload.rating,
-            comment: payload.comment,
-        }
+    const result = await prisma.$transaction(async (tx) => {
+        const updatedReview = await tx.review.update({
+            where: {
+                id: reviewData.id,
+            },
+            data: {
+                rating: payload.rating,
+                comment: payload.comment,
+            }
+        });
+
+        const averageRating = await tx.review.aggregate({
+            where: {
+                doctorId: reviewData.doctorId,
+            },
+            _avg: {
+                rating: true,
+            }
+        });
+
+        await tx.doctor.update({
+            where: {
+                id: reviewData.doctorId,
+            },
+            data: {
+                averageRating: averageRating._avg.rating as number,
+            }
+        });
+
+        return updatedReview;
     });
 
     return result;
