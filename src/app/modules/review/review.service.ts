@@ -3,7 +3,7 @@ import { PaymentStatus } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
-import { ICreateReviewPayload } from "./review.interface";
+import { ICreateReviewPayload, IUpdateReviewPayload } from "./review.interface";
 
 const getAllReviewsFromDB = async () => {
     const result = await prisma.review.findMany();
@@ -91,12 +91,46 @@ const createReviewInDB = async (user: IRequestUser, payload: ICreateReviewPayloa
     return result;
 }
 
-const updateReviewInDB = async () => {
+const updateReviewInDB = async (id: string, user: IRequestUser, payload: IUpdateReviewPayload) => {
+    await prisma.patient.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+    });
 
+    const reviewData = await prisma.review.findUniqueOrThrow({
+        where: {
+            id,
+        },
+    });
+
+    const result = await prisma.review.update({
+        where: {
+            id: reviewData.id,
+        },
+        data: {
+            rating: payload.rating,
+            comment: payload.comment,
+        }
+    });
+
+    return result;
 }
 
-const deleteReviewFromDB = async () => {
+const deleteReviewInDB = async (user: IRequestUser, id: string) => {
+    await prisma.patient.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+    });
 
+    const result = await prisma.review.delete({
+        where: {
+            appointmentId: id,
+        }
+    });
+
+    return result;
 }
 
 export const ReviewService = {
@@ -104,5 +138,5 @@ export const ReviewService = {
     getMyReviewsFromDB,
     createReviewInDB,
     updateReviewInDB,
-    deleteReviewFromDB
+    deleteReviewInDB
 };
