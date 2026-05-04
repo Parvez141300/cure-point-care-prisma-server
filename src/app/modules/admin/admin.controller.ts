@@ -47,11 +47,37 @@ const softDeleteAdmin = catchAsync(async (req: Request, res: Response) => {
         message: "Admin deleted successfully",
         data: result,
     });
-})
+});
+
+const changeUserStatus = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user;
+    const payload = req.body;
+    const result = await AdminService.changeUserStatusInDB(user, payload);
+    sendResponse(res, {
+        httpStatusCode: 200,
+        success: true,
+        message: "User status changed successfully",
+        data: result,
+    });
+});
+
+const changeUserRole = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user;
+    const payload = req.body;
+    const result = await AdminService.changeUserRoleInDB(user, payload);
+    sendResponse(res, {
+        httpStatusCode: 200,
+        success: true,
+        message: "User role changed successfully",
+        data: result,
+    });
+});
 
 export const AdminController = {
     getAllAdmin,
     getAdminById,
     softDeleteAdmin,
     updateAdmin,
+    changeUserStatus,
+    changeUserRole,
 }

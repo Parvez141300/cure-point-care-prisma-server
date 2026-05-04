@@ -1,8 +1,8 @@
 import status from "http-status";
-import { Role } from "../../../generated/prisma/enums";
+import { Role, UserStatus } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { IUpdateAdminPayload } from "./admin.interface";
+import { IChangeUserRolePayload, IChangeUserStatusPayload, IUpdateAdminPayload } from "./admin.interface";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 
 const getAllAdminFromDB = async () => {
@@ -101,9 +101,107 @@ const softDeleteAdminInDB = async (id: string, user: IRequestUser) => {
     return result;
 }
 
+const changeUserStatusInDB = async (user: IRequestUser, payload: IChangeUserStatusPayload) => {
+    const isAdminExist = await prisma.admin.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+        include: {
+            user: true,
+        },
+    });
+
+    const { userId, userStatus } = payload;
+
+    const userToChangeStatus = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        }
+    });
+
+    const selfStatusChange = isAdminExist.userId === userId;
+
+    if (selfStatusChange) {
+        throw new AppError(status.BAD_REQUEST, "You can not change your own status");
+    };
+
+    if (isAdminExist.user.role === Role.ADMIN && userToChangeStatus?.role === Role.SUPER_ADMIN) {
+        throw new AppError(status.UNAUTHORIZED, "You can not change status of a super admin. Only super admin can change status of another super admin");
+    }
+
+    if (isAdminExist.user.role === Role.ADMIN && userToChangeStatus?.role === Role.ADMIN) {
+        throw new AppError(status.UNAUTHORIZED, "You can not change status of another admin. Only super admin can change status of another admin");
+    }
+
+    if (userStatus === UserStatus.DELETED) {
+        throw new AppError(status.BAD_REQUEST, "You can not set user status to deleted user. Please use soft delete api to delete a user");
+    }
+
+    const result = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            status: userStatus,
+        }
+    });
+
+    return result;
+}
+
+const changeUserRoleInDB = async (user: IRequestUser, payload: IChangeUserRolePayload) => {
+    const isAdminExist = await prisma.admin.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+        include: {
+            user: true,
+        },
+    });
+
+    const { userId, role } = payload;
+
+    const userToChangeRole = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        }
+    });
+
+    const selfRoleChange = isAdminExist.userId === userId;
+
+    if (selfRoleChange) {
+        throw new AppError(status.BAD_REQUEST, "You can not change your own role");
+    };
+
+    if (isAdminExist.user.role === Role.ADMIN && userToChangeRole?.role === Role.SUPER_ADMIN) {
+        throw new AppError(status.UNAUTHORIZED, "You can not change role of a super admin. Only super admin can change role of another super admin");
+    }
+
+    if (isAdminExist.user.role === Role.ADMIN && userToChangeRole?.role === Role.ADMIN) {
+        throw new AppError(status.UNAUTHORIZED, "You can not change role of another admin. Only super admin can change role of another admin");
+    }
+
+    if (isAdminExist.user.role === Role.DOCTOR || isAdminExist.user.role === Role.PATIENT) {
+        throw new AppError(status.UNAUTHORIZED, "You are not authorized to change user role");
+    }
+
+    const result = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            role: role,
+        }
+    });
+
+    return result;
+}
+
 export const AdminService = {
     getAllAdminFromDB,
     getAdminByIdFromDB,
     softDeleteAdminInDB,
     updateAdminInDB,
+    changeUserStatusInDB,
+    changeUserRoleInDB,
 }
