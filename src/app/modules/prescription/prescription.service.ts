@@ -3,9 +3,9 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { IRequestUser } from "../../interfaces/requestUser.interface"
 import { prisma } from "../../lib/prisma";
-import { ICreatePrescriptionPayload } from "./prescription.interface";
+import { ICreatePrescriptionPayload, IUpdatePrescriptionPayload } from "./prescription.interface";
 import { generatePrescriptionPdf } from "./prescription.utils";
-import { uploadFileToCloudinary } from "../../../config/cloudinary.config";
+import { deleteFileFromCloudinary, uploadFileToCloudinary } from "../../../config/cloudinary.config";
 import { sendEmail } from "../../utils/email";
 
 const createPrescriptionInDB = async (user: IRequestUser, payload: ICreatePrescriptionPayload) => {
@@ -150,6 +150,107 @@ const getMyPrescriptionFromDB = async (user: IRequestUser) => {
     return result;
 }
 
+const updatedPrescriptionInDB = async (user: IRequestUser, prescriptionId: string, payload: IUpdatePrescriptionPayload) => {
+    const isUserExists = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+    });
+
+    if (!isUserExists) {
+        throw new AppError(status.NOT_FOUND, 'User not found');
+    }
+
+    const prescriptionData = await prisma.prescription.findUniqueOrThrow({
+        where: {
+            id: prescriptionId,
+        },
+        include: {
+            doctor: true,
+            patient: true,
+            appointment: {
+                include: {
+                    doctorSchedule: true,
+                },
+            },
+        }
+    });
+
+    if (prescriptionData.doctor.email !== user.email) {
+        throw new AppError(status.FORBIDDEN, 'You are not allowed to update this prescription');
+    };
+
+    const updatedInstructions = payload.instructions || prescriptionData.instructions;
+    const updatedFollowUpDate = payload.followUpDate ? new Date(payload.followUpDate) : prescriptionData.followUpDate;
+
+    const pdfBuffer = await generatePrescriptionPdf({
+        doctorName: prescriptionData.doctor.name,
+        doctorEmail: prescriptionData.doctor.email,
+        patientName: prescriptionData.patient.name,
+        patientEmail: prescriptionData.patient.email,
+        instructions: updatedInstructions,
+        followUpDate: updatedFollowUpDate,
+        prescriptionId: prescriptionData.id,
+        appointmentDate: prescriptionData.appointment.createdAt,
+        createdAt: new Date(),
+    });
+
+    const fileName = `Prescription-${Date.now()}.pdf`;
+    const uploadedFile = await uploadFileToCloudinary(pdfBuffer, fileName);
+    const newPdfUrl = uploadedFile.secure_url;
+
+    try {
+        if (prescriptionData.pdfUrl) {
+            await deleteFileFromCloudinary(prescriptionData.pdfUrl);
+        }
+    } catch (error: any) {
+        console.log('Error deleting old prescription PDF from Cloudinary:', error.message);
+    }
+
+    const result = await prisma.prescription.update({
+        where: {
+            id: prescriptionData.id,
+        },
+        data: {
+            instructions: updatedInstructions,
+            followUpDate: updatedFollowUpDate,
+            pdfUrl: newPdfUrl,
+        },
+        include: {
+            doctor: true,
+            patient: true,
+            appointment: {
+                include: {
+                    doctorSchedule: true,
+                },
+            },
+        }
+    });
+
+    try {
+        await sendEmail({
+            to: prescriptionData.patient.email,
+            subject: `Your prescription from Dr. ${prescriptionData.doctor.name} has been updated`,
+            templateName: 'prescription',
+            templateData: {
+                doctorName: prescriptionData.doctor.name,
+                doctorEmail: prescriptionData.doctor.email,
+                patientName: prescriptionData.patient.name,
+                patientEmail: prescriptionData.patient.email,
+                instructions: updatedInstructions,
+                followUpDate: updatedFollowUpDate,
+                prescriptionId: prescriptionData.id,
+                appointmentDate: prescriptionData.appointment.createdAt,
+                createdAt: new Date(),
+            }
+        });
+    } catch (error: any) {
+        console.log('Error for sending updated prescription email:', error instanceof Error ? error.message : error);
+    }
+
+    return result;
+}
+
 const deletePrescriptionFromDB = async (user: IRequestUser, id: string) => {
     const patientData = await prisma.patient.findUniqueOrThrow({
         where: {
@@ -178,4 +279,5 @@ export const PrescriptionService = {
     getMyPrescriptionFromDB,
     getAllPrescriptionsFromDB,
     deletePrescriptionFromDB,
+    updatedPrescriptionInDB,
 }

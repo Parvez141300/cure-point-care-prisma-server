@@ -37,6 +37,19 @@ const createPrescription = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const updatePrescription = catchAsync(async (req: Request, res: Response) => {
+    const { id: prescriptionId } = req.params;
+    const user = req.user;
+    const payload = req.body;
+    const result = await PrescriptionService.updatedPrescriptionInDB(user, prescriptionId as string, payload);
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Prescription updated successfully",
+        data: result,
+    });
+});
+
 const deletePrescription = catchAsync(async (req: Request, res: Response) => {
     const { id: prescriptionId } = req.params;
     const user = req.user;
@@ -53,5 +66,6 @@ export const PrescriptionController = {
     getMyPrescription,
     getAllPrescriptions,
     deletePrescription,
+    updatePrescription,
     createPrescription,
 }
