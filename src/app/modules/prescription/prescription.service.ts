@@ -124,6 +124,9 @@ const createPrescriptionInDB = async (user: IRequestUser, payload: ICreatePrescr
         }
 
         return updatedPrescription;
+    }, {
+        maxWait: 15000,
+        timeout: 20000,
     });
 
     return result;
