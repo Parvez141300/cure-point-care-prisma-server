@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { IRequestUser } from "../../interfaces/requestUser.interface"
@@ -5,12 +6,20 @@ import { prisma } from "../../lib/prisma";
 import { ICreatePrescriptionPayload } from "./prescription.interface";
 import { generatePrescriptionPdf } from "./prescription.utils";
 import { uploadFileToCloudinary } from "../../../config/cloudinary.config";
+import { sendEmail } from "../../utils/email";
 
 const createPrescriptionInDB = async (user: IRequestUser, payload: ICreatePrescriptionPayload) => {
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             email: user.email,
         },
+        include: {
+            specialities: {
+                include: {
+                    speciality: true,
+                },
+            }
+        }
     });
 
     const appointmentData = await prisma.appointment.findUniqueOrThrow({
@@ -19,7 +28,15 @@ const createPrescriptionInDB = async (user: IRequestUser, payload: ICreatePrescr
         },
         include: {
             patient: true,
-            doctor: true,
+            doctor: {
+                include: {
+                    specialities: {
+                        include: {
+                            speciality: true,
+                        },
+                    },
+                },
+            },
         }
     });
 
@@ -74,6 +91,37 @@ const createPrescriptionInDB = async (user: IRequestUser, payload: ICreatePrescr
                 pdfUrl: pdfUrl,
             }
         });
+
+        try {
+            const patientData = appointmentData.patient;
+            const doctorData = appointmentData.doctor;
+
+            await sendEmail({
+                to: patientData.email,
+                subject: `You have received a new prescription from Dr. ${doctorData.name}`,
+                templateName: 'prescription',
+                templateData: {
+                    doctorName: doctorData.name,
+                    doctorEmail: doctorData.email,
+                    patientName: patientData.name,
+                    patientEmail: patientData.email,
+                    instructions: payload.instructions,
+                    followUpDate: followUpDate,
+                    prescriptionId: createdPrescriptionData.id,
+                    appointmentDate: appointmentData.createdAt,
+                    createdAt: new Date(),
+                    specialization: appointmentData.doctor.specialities.map(s => s.speciality.title).join(', '),
+                },
+                attachements: [{
+                    filename: fileName,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf',
+                }],
+            });
+
+        } catch (error: any) {
+            console.log('Error for sending prescription email:', error.message);
+        }
 
         return updatedPrescription;
     });
