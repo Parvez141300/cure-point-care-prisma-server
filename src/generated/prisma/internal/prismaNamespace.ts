@@ -1903,6 +1903,7 @@ export const PaymentScalarFieldEnum = {
   stripeEventId: 'stripeEventId',
   status: 'status',
   paymentGatewayData: 'paymentGatewayData',
+  invoiceUrl: 'invoiceUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1917,6 +1918,7 @@ export const PrescriptionScalarFieldEnum = {
   doctorId: 'doctorId',
   instructions: 'instructions',
   followUpDate: 'followUpDate',
+  pdfUrl: 'pdfUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

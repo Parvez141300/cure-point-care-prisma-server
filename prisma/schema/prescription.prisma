@@ -6,6 +6,7 @@ model Prescription {
 
     instructions String
     followUpDate DateTime
+    pdfUrl       String?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
