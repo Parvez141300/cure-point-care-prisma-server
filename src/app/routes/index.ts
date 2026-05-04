@@ -11,6 +11,7 @@ import { DoctorScheduleRoute } from "../modules/doctorSchedule/doctorSchedule.ro
 import { PatientRoute } from "../modules/patient/patient.route";
 import { ReviewRoute } from "../modules/review/review.route";
 import { PrescriptionRoute } from "../modules/prescription/prescription.route";
+import { StatsRoute } from "../modules/stats/stats.route";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/doctor-schedules", DoctorScheduleRoute);
 router.use("/appointments", AppointmentRoute);
 router.use("/reviews", ReviewRoute);
 router.use("/prescriptions", PrescriptionRoute);
+router.use("/stats", StatsRoute);
 
 export const IndexRoute = router;
