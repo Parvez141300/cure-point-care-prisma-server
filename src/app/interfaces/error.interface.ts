@@ -9,5 +9,5 @@ export interface IErrorResponse {
     message: string;
     errorSources: IErrorSources[];
     stack?: string;
-    data?: unknown;
+    error?: unknown;
 }

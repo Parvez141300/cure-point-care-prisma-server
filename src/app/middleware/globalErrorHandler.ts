@@ -87,7 +87,7 @@ export const globalErrorHandler = async (err: any, req: Request, res: Response, 
         message: message,
         errorSources,
         stack: envVars.NODE_ENV === "development" ? stack : undefined,
-        data: envVars.NODE_ENV === "development" ? err : undefined,
+        error: envVars.NODE_ENV === "development" ? err : undefined,
     }
 
     res.status(statusCode).json(errorResponse);
