@@ -390,6 +390,22 @@ const googleLoginSuccessFromDB = async (session: Record<string, any>) => {
     return { accessToken, refreshToken };
 }
 
+const getLoggedInUserInfoFromDB = async (accessToken: string) => {
+    const decode = jwtUtils.decodeToken(accessToken);
+
+    const userInfo = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: decode.email,
+        }
+    });
+
+    if (userInfo.status === UserStatus.DELETED) {
+        throw new AppError(status.BAD_REQUEST, 'User is deleted. Please contact support');
+    }
+
+    return userInfo;
+}
+
 export const AuthService = {
     registerPatientInDB,
     loginUserInDB,
@@ -400,4 +416,5 @@ export const AuthService = {
     forgetPasswordInBetterAuth,
     resetPasswordInBetterAuth,
     googleLoginSuccessFromDB,
+    getLoggedInUserInfoFromDB,
 }

@@ -197,6 +197,17 @@ const handleOAuthError = catchAsync(async (req: Request, res: Response) => {
     res.redirect(`${envVars.FRONTEND_URL}/login?error=${error}`);
 });
 
+const getLoggedInUserInfo = catchAsync(async (req: Request, res: Response) => {
+    const accessToken = req.cookies.accessToken as string;
+    const result = await AuthService.getLoggedInUserInfoFromDB(accessToken);
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "User logged in successfully",
+        data: result,
+    });
+});
+
 export const AuthController = {
     registerPatient,
     loginUser,
@@ -209,4 +220,5 @@ export const AuthController = {
     gooleLogin,
     googleLoginSuccess,
     handleOAuthError,
+    getLoggedInUserInfo,
 }
