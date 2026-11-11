@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 5000
 
 # প্রিজমা ক্লায়েন্ট জেনারেট করে dev সার্ভার চালু
-CMD [ "sh", "-c", "pnpm run generate && pnpm run dev" ]
+CMD [ "sh", "-c", "CI=true pnpm install && pnpm generate && pnpm dev" ]
