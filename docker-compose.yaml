@@ -44,7 +44,6 @@ services:
 
 networks:
   cure-net:
-    external: true
     name: cure-net
 
 volumes:
